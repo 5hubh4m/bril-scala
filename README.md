@@ -1,4 +1,4 @@
-## bril-scala
+# bril-scala
 
 This is a standalone library to enable processing of [Bril](https://capra.cs.cornell.edu/bril/intro.html) programs
 in Scala. It contains tools to parse a JSON representing a Bril program into a typed representation
@@ -27,9 +27,9 @@ libraryDependencies += "edu.cornell" %%  "bril-scala" % "0.1.0"
 
 ### Overview
 
-The library has two classes `bril.lang.BrilAST` which contains `case class`es to represent a
-Bril program like `Program`, `Function`, etc.
+The library has three main classes:
 
-The class `bril.lang.BrilParse` contains functions that take in a JSON input and convert it into
-a `Program`. There is even a convenience function (called `readProgramFromStdin`) that will parse
-the `stdin` and produce a `Option[Program]` for you.
+* `bril.lang.BrilAST` which contains `case class`es to represent a Bril program like `Program`, `Function`, etc.
+* `bril.lang.BrilJson` which contain the logic to convert Bril programs to/from JSON/
+* `bril.lang.BrilParse` contains convenience functions (`readProgramFromStdin` and `printProgramToJson`) 
+  that will consume `stdin` and produce a `Try[Program]` for you and pretty print a `Program` to a JSON string.

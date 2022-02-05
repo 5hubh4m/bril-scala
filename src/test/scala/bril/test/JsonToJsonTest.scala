@@ -10,6 +10,6 @@ import bril.lang.BrilParse._
 case object JsonToJsonTest extends App {
 
   // read the program from stdin and print the JSON back to stdout
-  print(printProgramToJSON(readProgramFromStdin.get))
+  print(printProgramToJson(readProgramFromStdin.get))
 
 }

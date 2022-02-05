@@ -22,6 +22,6 @@ case object BrilParse {
   /**
    * Pretty print the JSON of a Bril program.
    */
-  def printProgramToJSON(program: Program): String = program.toJson.prettyPrint
+  def printProgramToJson(program: Program): String = program.toJson.prettyPrint
 
 }
