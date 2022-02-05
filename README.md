@@ -33,3 +33,16 @@ The library has three main classes:
 * `bril.lang.BrilJson` which contain the logic to convert Bril programs to/from JSON/
 * `bril.lang.BrilParse` contains convenience functions (`readProgramFromStdin` and `printProgramToJson`) 
   that will consume `stdin` and produce a `Try[Program]` for you and pretty print a `Program` to a JSON string.
+
+### Testing
+
+The library has one test called `JsonToJsonTest` which reads a JSON Bril program and parses it to a `Program` and 
+produces a pretty printed JSON string. We can test the end-to-end functionality using [Turnt](https://github.com/cucapra/turnt)
+by comparing the input and output JSONs using some `diff` and `jq` magic. The output of the test should be an empty file
+indicating the output JSON is identical to the input.
+
+The `test` contains the all same tests used for `brili`. Run the tests in the directory using:
+
+```
+turnt *.bril
+```
