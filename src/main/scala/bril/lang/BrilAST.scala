@@ -27,9 +27,9 @@ case object BrilAST {
   /**
    * Values possible in a program.
    */
-  trait Value { val types: Set[Type] }
-  case class BoolValue(value: Boolean) extends Value { lazy val types: Set[Type] = Set(BoolType) }
-  case class NumericValue(value: BigDecimal) extends Value { lazy val types: Set[Type] = Set(IntType, FloatType) }
+  trait Value
+  case class BoolValue(value: Boolean) extends Value
+  case class NumericValue(value: BigDecimal) extends Value
 
   /**
    * A function has a name, a list of arguments,

@@ -1,0 +1,2 @@
+command = "bash -c \"diff <(bril2json < {filename} | jq --sort-keys .) <(bril2json < {filename} | ../scripts/run_test | jq --sort-keys .)\""
+output.out = "-"
