@@ -51,27 +51,28 @@ case object BrilAst {
   trait BoolOp extends OpType
   trait PtrOp extends OpType
   trait ComparisonOp extends OpType
-  case object Add extends IntOp
+  trait CommutativeOp extends OpType
+  case object Add extends IntOp with CommutativeOp
+  case object Mul extends IntOp with CommutativeOp
   case object Sub extends IntOp
   case object Div extends IntOp
-  case object Mul extends IntOp
-  case object FAdd extends FloatOp
+  case object FAdd extends FloatOp with CommutativeOp
+  case object FMul extends FloatOp with CommutativeOp
   case object FSub extends FloatOp
   case object FDiv extends FloatOp
-  case object FMul extends FloatOp
-  case object Or extends BoolOp
-  case object And extends BoolOp
+  case object Or extends BoolOp with CommutativeOp
+  case object And extends BoolOp with CommutativeOp
   case object Not extends BoolOp
   case object LT extends ComparisonOp with IntOp
   case object GT extends ComparisonOp with IntOp
   case object LE extends ComparisonOp with IntOp
   case object GE extends ComparisonOp with IntOp
-  case object EQ extends ComparisonOp with IntOp
+  case object EQ extends ComparisonOp with IntOp with CommutativeOp
   case object FLT extends ComparisonOp with FloatOp
   case object FGT extends ComparisonOp with FloatOp
   case object FLE extends ComparisonOp with FloatOp
   case object FGE extends ComparisonOp with FloatOp
-  case object FEQ extends ComparisonOp with FloatOp
+  case object FEQ extends ComparisonOp with FloatOp with CommutativeOp
   case object PtrAdd extends PtrOp
 
   /**

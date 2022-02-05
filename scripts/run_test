@@ -1,4 +1,4 @@
 #!/bin/bash
 # Get the dir of this project
 DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)/..
-java -classpath "$DIR"/target/scala-2.13/test-classes:"$DIR"/target/scala-2.13/classes:"$HOME"/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/io/spray/spray-json_2.13/1.3.6/spray-json_2.13-1.3.6.jar:"$HOME"/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.7/scala-library-2.13.7.jar bril.test.JsonToJsonTest
+java -cp "$DIR/target/scala-2.13/bril-scala-assembly-0.1.0.jar" bril.test.JsonToJsonTest

@@ -6,6 +6,10 @@ that is easier to manipulate in a strongly typed language like Scala.
 
 ### Getting Started
 
+This project depends upon the following dependencies to use fully:
+* `java` and `sbt` for building and running
+* `turnt`, `diff`, and `jq` for running test scripts
+
 You can compile the library and publish it to your local [Ivy](https://ant.apache.org/ivy/) repository using `sbt`.
 If you have `sbt` installed, from inside the project root, execute:
 
@@ -30,7 +34,7 @@ libraryDependencies += "edu.cornell" %%  "bril-scala" % "0.1.0"
 The library has three main classes:
 
 * `bril.lang.BrilAst` which contains `case class`es to represent a Bril program like `Program`, `Function`, etc.
-* `bril.lang.BrilJson` which contain the logic to convert Bril programs to/from JSON/
+* `bril.lang.BrilJson` which contain the logic to convert Bril programs to/from JSON.
 * `bril.lang.BrilParse` contains convenience functions (`readProgramFromStdin` and `printProgramToJson`) 
   that will consume `stdin` and produce a `Try[Program]` for you and pretty print a `Program` to a JSON string.
 
@@ -41,8 +45,18 @@ produces a pretty printed JSON string. We can test the end-to-end functionality 
 by comparing the input and output JSONs using some `diff` and `jq` magic. The output of the test should be an empty file
 indicating the output JSON is identical to the input.
 
-The `test` contains the all same tests used for `brili`. Run the tests in the directory using:
+The `test` contains the all same tests used for `brili`. To use these tests, we first need to compile the package into
+a fat JAR that can be run with just `java`. We use [sbt-assembly](https://github.com/sbt/sbt-assembly) for that.
+From inside the project root, execute:
 
 ```
+sbt assembly
+```
+
+This will build a fat JAR for the project which the script `scripts/run_test` can call for you with the right `mainClass`,
+and is what `turnt` uses. Run the tests in the `tests` directory using:
+
+```
+cd tests/
 turnt *.bril
 ```
