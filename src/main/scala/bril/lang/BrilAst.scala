@@ -62,11 +62,16 @@ case object BrilAst {
   case object Or extends BoolOp
   case object And extends BoolOp
   case object Not extends BoolOp
-  case object LT extends ComparisonOp
-  case object GT extends ComparisonOp
-  case object LE extends ComparisonOp
-  case object GE extends ComparisonOp
-  case object EQ extends ComparisonOp
+  case object LT extends ComparisonOp with IntOp
+  case object GT extends ComparisonOp with IntOp
+  case object LE extends ComparisonOp with IntOp
+  case object GE extends ComparisonOp with IntOp
+  case object EQ extends ComparisonOp with IntOp
+  case object FLT extends ComparisonOp with FloatOp
+  case object FGT extends ComparisonOp with FloatOp
+  case object FLE extends ComparisonOp with FloatOp
+  case object FGE extends ComparisonOp with FloatOp
+  case object FEQ extends ComparisonOp with FloatOp
   case object PtrAdd extends PtrOp
 
   /**
