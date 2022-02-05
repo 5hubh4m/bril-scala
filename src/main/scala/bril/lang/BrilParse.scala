@@ -1,6 +1,6 @@
 package bril.lang
 
-import bril.lang.BrilAST._
+import bril.lang.BrilAst._
 import bril.lang.BrilJson._
 import spray.json._
 

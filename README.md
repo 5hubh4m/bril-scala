@@ -29,7 +29,7 @@ libraryDependencies += "edu.cornell" %%  "bril-scala" % "0.1.0"
 
 The library has three main classes:
 
-* `bril.lang.BrilAST` which contains `case class`es to represent a Bril program like `Program`, `Function`, etc.
+* `bril.lang.BrilAst` which contains `case class`es to represent a Bril program like `Program`, `Function`, etc.
 * `bril.lang.BrilJson` which contain the logic to convert Bril programs to/from JSON/
 * `bril.lang.BrilParse` contains convenience functions (`readProgramFromStdin` and `printProgramToJson`) 
   that will consume `stdin` and produce a `Try[Program]` for you and pretty print a `Program` to a JSON string.
