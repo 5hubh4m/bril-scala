@@ -72,33 +72,85 @@ case object BrilAST {
   /**
    * Different types of instructions have their own parameters.
    */
-  trait Instruction
+  trait Instruction {
+    val args: Seq[Ident] = Seq()
+    val labels: Seq[Ident] = Seq()
+    val funcs: Seq[Ident] = Seq()
+  }
+  trait ValueOp extends Instruction { val dest: Option[Ident]; val typ: Option[Type] }
+  trait EffectOp extends Instruction
+  trait ControlOp extends EffectOp
 
   // instructions in the core language and the floating point extension.
-  case class Label(label: Ident) extends Instruction
-  case class Const(dest: Option[Ident], typ: Option[Type], value: Value) extends Instruction
-  case class UnOp(op: OpType, dest: Option[Ident], typ: Option[Type], x: Ident) extends Instruction
-  case class BinOp(op: OpType, dest: Option[Ident], typ: Option[Type], x: Ident, y: Ident) extends Instruction
-  case class Jmp(label: Ident) extends Instruction
-  case class Br(source: Ident, trueLabel: Ident, falseLabel: Ident) extends Instruction
-  case class Call(dest: Option[Ident], typ: Option[Type], function: Ident, args: Seq[Ident] = Seq()) extends Instruction
-  case class Ret(source: Option[Ident] = None) extends Instruction
-  case class Id(dest: Option[Ident], typ: Option[Type], source: Ident) extends Instruction
-  case class Print(source: Ident) extends Instruction
-  case object NoOp extends Instruction
+  case class Label(label: Ident) extends Instruction {
+    override val labels = Seq(label)
+  }
+
+  case class Const(dest: Option[Ident], typ: Option[Type], value: Value) extends ValueOp
+
+  case class UnOp(op: OpType, dest: Option[Ident], typ: Option[Type], x: Ident) extends ValueOp {
+    override val args = Seq(x)
+  }
+
+  case class BinOp(op: OpType, dest: Option[Ident], typ: Option[Type], x: Ident, y: Ident) extends ValueOp {
+    override val args = Seq(x, y)
+  }
+
+  case class Jmp(label: Ident) extends ControlOp {
+    override val labels = Seq(label)
+  }
+
+  case class Br(source: Ident, trueLabel: Ident, falseLabel: Ident) extends ControlOp {
+    override val args = Seq(source)
+    override val labels = Seq(trueLabel, falseLabel)
+  }
+
+  case class Call(dest: Option[Ident], typ: Option[Type], function: Ident, override val args: Seq[Ident]) extends ValueOp with ControlOp {
+    override val funcs = Seq(function)
+  }
+
+  case class Ret(source: Option[Ident]) extends ControlOp {
+    override val args: Seq[Ident] = source.toSeq
+  }
+
+  case class Id(dest: Option[Ident], typ: Option[Type], source: Ident) extends ValueOp {
+    override val args = Seq(source)
+  }
+
+  case class Print(source: Ident) extends EffectOp {
+    override val args = Seq(source)
+  }
+
+  case object NoOp extends EffectOp
 
   // instructions in the memory extension.
-  case class Store(location: Ident, source: Ident) extends Instruction
-  case class Alloc(dest: Option[Ident], typ: Option[Type], size: Ident) extends Instruction
-  case class Free(source: Ident) extends Instruction
-  case class Load(dest: Option[Ident], typ: Option[Type], source: Ident) extends Instruction
+  case class Store(location: Ident, source: Ident) extends EffectOp {
+    override val args = Seq(location, source)
+  }
+
+  case class Alloc(dest: Option[Ident], typ: Option[Type], size: Ident) extends ValueOp with EffectOp {
+    override val args = Seq(size)
+  }
+
+  case class Free(source: Ident) extends EffectOp {
+    override val args = Seq(source)
+  }
+
+  case class Load(dest: Option[Ident], typ: Option[Type], source: Ident) extends ValueOp {
+    override val args = Seq(source)
+  }
 
   // instructions in the SSA extension.
-  case class Phi(dest: Option[Ident], typ: Option[Type], sources: Seq[Ident], labels: Seq[Ident]) extends Instruction
+  case class Phi(dest: Option[Ident], typ: Option[Type], override val args: Seq[Ident], override val labels: Seq[Ident]) extends ValueOp
 
   // instructions in the speculative execution extension.
-  case object Speculate extends Instruction
-  case object Commit extends Instruction
-  case class Guard(source: Ident, label: Ident) extends Instruction
+  case object Speculate extends EffectOp
+
+  case object Commit extends EffectOp
+
+  case class Guard(source: Ident, label: Ident) extends EffectOp {
+    override val args = Seq(source)
+    override val labels = Seq(label)
+  }
 
 }
