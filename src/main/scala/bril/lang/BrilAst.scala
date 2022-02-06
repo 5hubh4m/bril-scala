@@ -68,11 +68,13 @@ case object BrilAst {
   case object LE extends ComparisonOpType with IntOpType
   case object GE extends ComparisonOpType with IntOpType
   case object EQ extends ComparisonOpType with IntOpType with CommutativeOpType
+  case object NE extends ComparisonOpType with IntOpType with CommutativeOpType
   case object FLT extends ComparisonOpType with FloatOpType
   case object FGT extends ComparisonOpType with FloatOpType
   case object FLE extends ComparisonOpType with FloatOpType
   case object FGE extends ComparisonOpType with FloatOpType
   case object FEQ extends ComparisonOpType with FloatOpType with CommutativeOpType
+  case object FNE extends ComparisonOpType with FloatOpType with CommutativeOpType
   case object PtrAdd extends PtrOpType
 
   /**
@@ -85,6 +87,10 @@ case object BrilAst {
     val labels: Seq[Ident] = Seq()
     val funcs: Seq[Ident] = Seq()
   }
+  object Instruction{
+    def unapply(instr: Instruction): Option[(Seq[Ident], Seq[Ident], Seq[Ident])] =
+      Some(instr.args, instr.labels, instr.funcs)
+  }
 
   /**
    * Value operation instructions optionally
@@ -93,6 +99,10 @@ case object BrilAst {
   trait ValueOp extends Instruction {
     val dest: Option[Ident] = None
     val typ: Option[Type] = None
+  }
+  object ValueOp{
+    def unapply(instr: ValueOp): Option[(Option[Ident], Option[Type], Seq[Ident], Seq[Ident], Seq[Ident])] =
+      Some(instr.dest, instr.typ, instr.args, instr.labels, instr.funcs)
   }
 
   /**
