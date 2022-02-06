@@ -157,8 +157,8 @@ case object BrilJson extends DefaultJsonProtocol {
       val funcs = if (instr.funcs.nonEmpty) Seq("funcs" -> instr.funcs.toJson) else Seq()
       val args = if (instr.args.nonEmpty) Seq("args" -> instr.args.toJson) else Seq()
       val labels = if (instr.labels.nonEmpty) Seq("labels" -> instr.labels.toJson) else Seq()
-      val dest = instr.dest.map(d => Seq("dest" -> d.toJson)).getOrElse(Seq())
-      val typ = instr.typ.map(t => Seq("type" -> t.toJson)).getOrElse(Seq())
+      val dest = Seq(instr).collect({ case v: ValueOp if v.dest.isDefined => "dest" -> v.dest.get.toJson })
+      val typ = Seq(instr).collect({ case v: ValueOp if v.typ.isDefined => "type" -> v.typ.get.toJson })
 
       // get the fields concatenated according to per-op values
       val fields = funcs ++ args ++ labels ++ dest ++ typ ++ (instr match {
@@ -219,8 +219,8 @@ case object BrilJson extends DefaultJsonProtocol {
       // populate all the fields
       val fields: Seq[(String, JsValue)] =
         Seq("name" -> func.name.toJson, "instrs" -> func.instrs.toJson) ++
-        func.typ.map("type" -> _.toJson) ++
-        (if (func.args.nonEmpty) Seq("args" -> func.args.toJson) else Seq())
+        (if (func.args.nonEmpty) Seq("args" -> func.args.toJson) else Seq()) ++
+        func.typ.map("type" -> _.toJson)
 
       // create the object
       JsObject(fields: _*)

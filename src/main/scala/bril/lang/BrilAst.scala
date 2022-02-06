@@ -46,47 +46,63 @@ case object BrilAst {
    * Different types of primitive ops.
    */
   trait OpType
-  trait IntOp extends OpType
-  trait FloatOp extends OpType
-  trait BoolOp extends OpType
-  trait PtrOp extends OpType
-  trait ComparisonOp extends OpType
-  trait CommutativeOp extends OpType
-  case object Add extends IntOp with CommutativeOp
-  case object Mul extends IntOp with CommutativeOp
-  case object Sub extends IntOp
-  case object Div extends IntOp
-  case object FAdd extends FloatOp with CommutativeOp
-  case object FMul extends FloatOp with CommutativeOp
-  case object FSub extends FloatOp
-  case object FDiv extends FloatOp
-  case object Or extends BoolOp with CommutativeOp
-  case object And extends BoolOp with CommutativeOp
-  case object Not extends BoolOp
-  case object LT extends ComparisonOp with IntOp
-  case object GT extends ComparisonOp with IntOp
-  case object LE extends ComparisonOp with IntOp
-  case object GE extends ComparisonOp with IntOp
-  case object EQ extends ComparisonOp with IntOp with CommutativeOp
-  case object FLT extends ComparisonOp with FloatOp
-  case object FGT extends ComparisonOp with FloatOp
-  case object FLE extends ComparisonOp with FloatOp
-  case object FGE extends ComparisonOp with FloatOp
-  case object FEQ extends ComparisonOp with FloatOp with CommutativeOp
-  case object PtrAdd extends PtrOp
+  trait IntOpType extends OpType
+  trait FloatOpType extends OpType
+  trait BoolOpType extends OpType
+  trait PtrOpType extends OpType
+  trait ComparisonOpType extends OpType
+  trait CommutativeOpType extends OpType
+  case object Add extends IntOpType with CommutativeOpType
+  case object Mul extends IntOpType with CommutativeOpType
+  case object Sub extends IntOpType
+  case object Div extends IntOpType
+  case object FAdd extends FloatOpType with CommutativeOpType
+  case object FMul extends FloatOpType with CommutativeOpType
+  case object FSub extends FloatOpType
+  case object FDiv extends FloatOpType
+  case object Or extends BoolOpType with CommutativeOpType
+  case object And extends BoolOpType with CommutativeOpType
+  case object Not extends BoolOpType
+  case object LT extends ComparisonOpType with IntOpType
+  case object GT extends ComparisonOpType with IntOpType
+  case object LE extends ComparisonOpType with IntOpType
+  case object GE extends ComparisonOpType with IntOpType
+  case object EQ extends ComparisonOpType with IntOpType with CommutativeOpType
+  case object FLT extends ComparisonOpType with FloatOpType
+  case object FGT extends ComparisonOpType with FloatOpType
+  case object FLE extends ComparisonOpType with FloatOpType
+  case object FGE extends ComparisonOpType with FloatOpType
+  case object FEQ extends ComparisonOpType with FloatOpType with CommutativeOpType
+  case object PtrAdd extends PtrOpType
 
   /**
-   * Different types of instructions have their own parameters.
+   * Represents an instruction. All instructions
+   * have arguments, labels, and functions they
+   * reference.
    */
   trait Instruction {
-    val dest: Option[Ident] = None
-    val typ: Option[Type] = None
     val args: Seq[Ident] = Seq()
     val labels: Seq[Ident] = Seq()
     val funcs: Seq[Ident] = Seq()
   }
-  trait ValueOp extends Instruction
+
+  /**
+   * Value operation instructions optionally
+   * have a destination and a type.
+   */
+  trait ValueOp extends Instruction {
+    val dest: Option[Ident] = None
+    val typ: Option[Type] = None
+  }
+
+  /**
+   * Effect operations are ones with some side-effect.
+   */
   trait EffectOp extends Instruction
+
+  /**
+   * Control operations change the control flow of execution.
+   */
   trait ControlOp extends EffectOp
 
   // instructions in the core language and the floating point extension.
