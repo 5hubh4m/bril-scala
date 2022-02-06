@@ -125,7 +125,6 @@ case object BrilJson extends DefaultJsonProtocol {
           case JsString("ge") -> Seq(x, y) -> _ -> _ => BinOp(GE, dest, typ, x, y)
           case JsString("le") -> Seq(x, y) -> _ -> _ => BinOp(LE, dest, typ, x, y)
           case JsString("eq") -> Seq(x, y) -> _ -> _ => BinOp(EQ, dest, typ, x, y)
-          case JsString("ne") -> Seq(x, y) -> _ -> _ => BinOp(NE, dest, typ, x, y)
 
           // floating point comparison ops
           case JsString("flt") -> Seq(x, y) -> _ -> _ => BinOp(FLT, dest, typ, x, y)
@@ -133,7 +132,6 @@ case object BrilJson extends DefaultJsonProtocol {
           case JsString("fge") -> Seq(x, y) -> _ -> _ => BinOp(FGE, dest, typ, x, y)
           case JsString("fle") -> Seq(x, y) -> _ -> _ => BinOp(FLE, dest, typ, x, y)
           case JsString("feq") -> Seq(x, y) -> _ -> _ => BinOp(FEQ, dest, typ, x, y)
-          case JsString("fne") -> Seq(x, y) -> _ -> _ => BinOp(FNE, dest, typ, x, y)
 
           // boolean ops
           case JsString("or") -> Seq(x, y) -> _ -> _ => BinOp(Or, dest, typ, x, y)

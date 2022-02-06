@@ -27,9 +27,15 @@ case object BrilAst {
   /**
    * Values possible in a program.
    */
-  trait Value
-  case class BoolValue(value: Boolean) extends Value
-  case class NumericValue(value: BigDecimal) extends Value
+  trait Value { val asBool: Boolean; val asNum: BigDecimal }
+  case class BoolValue(value: Boolean) extends Value {
+    val asBool: Boolean = value
+    override val asNum: BigDecimal = if (value) 1 else 0
+  }
+  case class NumericValue(value: BigDecimal) extends Value {
+    val asBool: Boolean = value != 0
+    val asNum: BigDecimal = value
+  }
 
   /**
    * A function has a name, a list of arguments,
@@ -68,13 +74,11 @@ case object BrilAst {
   case object LE extends ComparisonOpType with IntOpType
   case object GE extends ComparisonOpType with IntOpType
   case object EQ extends ComparisonOpType with IntOpType with CommutativeOpType
-  case object NE extends ComparisonOpType with IntOpType with CommutativeOpType
   case object FLT extends ComparisonOpType with FloatOpType
   case object FGT extends ComparisonOpType with FloatOpType
   case object FLE extends ComparisonOpType with FloatOpType
   case object FGE extends ComparisonOpType with FloatOpType
   case object FEQ extends ComparisonOpType with FloatOpType with CommutativeOpType
-  case object FNE extends ComparisonOpType with FloatOpType with CommutativeOpType
   case object PtrAdd extends PtrOpType
 
   /**
