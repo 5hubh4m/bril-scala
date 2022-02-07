@@ -112,7 +112,7 @@ case object BrilAst {
     def mapFuncs(f: Ident => Ident): InstrType = this.asInstanceOf[InstrType]
   }
   object Instruction{
-    def unapply(instr: Instruction): Option[(Seq[Ident], Seq[Ident], Seq[Ident])] =
+    def unapply(instr: Instruction): Some[(Seq[Ident], Seq[Ident], Seq[Ident])] =
       Some(instr.args, instr.labels, instr.funcs)
   }
 
@@ -138,8 +138,8 @@ case object BrilAst {
     def mapType(f: Option[Type] => Option[Type]): ValType = this.asInstanceOf[ValType]
   }
   object ValueOp {
-    def unapply(instr: ValueOp): Option[(Option[Ident], Option[Type], Seq[Ident], Seq[Ident], Seq[Ident])] =
-      Some(instr.dest, instr.typ, instr.args, instr.labels, instr.funcs)
+    def unapply(instr: ValueOp): Some[(Seq[Ident], Seq[Ident], Seq[Ident], Option[Ident], Option[Type])] =
+      Some(instr.args, instr.labels, instr.funcs, instr.dest, instr.typ)
   }
 
   /**
