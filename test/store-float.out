@@ -1,0 +1,1 @@
+{"functions":[{"instrs":[{"dest":"one","op":"const","type":"int","value":1},{"dest":"seed","op":"const","type":"float","value":109658},{"args":["one"],"dest":"rng","op":"alloc","type":{"ptr":"float"}},{"args":["rng","seed"],"op":"store"},{"args":["rng"],"dest":"x","op":"load","type":"float"},{"args":["x"],"op":"print"},{"args":["rng"],"op":"free"}],"name":"main"}]}
