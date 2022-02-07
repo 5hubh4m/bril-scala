@@ -52,23 +52,25 @@ case object BrilAst {
    * Different types of primitive ops.
    */
   sealed trait OpType
-  trait IntOpType extends OpType
-  trait FloatOpType extends OpType
-  trait BoolOpType extends OpType
-  trait PtrOpType extends OpType
-  trait ComparisonOpType extends OpType
-  trait CommutativeOpType extends OpType
+  sealed trait BinOpType extends OpType
+  sealed trait UnOpType extends OpType
+  sealed trait IntOpType extends OpType
+  sealed trait FloatOpType extends OpType
+  sealed trait BoolOpType extends OpType
+  sealed trait PtrOpType extends OpType
+  sealed trait ComparisonOpType extends OpType with BinOpType
+  sealed trait CommutativeOpType extends OpType with BinOpType
   case object Add extends IntOpType with CommutativeOpType
   case object Mul extends IntOpType with CommutativeOpType
-  case object Sub extends IntOpType
-  case object Div extends IntOpType
+  case object Sub extends IntOpType with BinOpType
+  case object Div extends IntOpType with BinOpType
   case object FAdd extends FloatOpType with CommutativeOpType
   case object FMul extends FloatOpType with CommutativeOpType
-  case object FSub extends FloatOpType
-  case object FDiv extends FloatOpType
+  case object FSub extends FloatOpType with BinOpType
+  case object FDiv extends FloatOpType with BinOpType
   case object Or extends BoolOpType with CommutativeOpType
   case object And extends BoolOpType with CommutativeOpType
-  case object Not extends BoolOpType
+  case object Not extends BoolOpType with UnOpType
   case object LT extends ComparisonOpType with IntOpType
   case object GT extends ComparisonOpType with IntOpType
   case object LE extends ComparisonOpType with IntOpType
@@ -79,7 +81,7 @@ case object BrilAst {
   case object FLE extends ComparisonOpType with FloatOpType
   case object FGE extends ComparisonOpType with FloatOpType
   case object FEQ extends ComparisonOpType with FloatOpType with CommutativeOpType
-  case object PtrAdd extends PtrOpType
+  case object PtrAdd extends PtrOpType with BinOpType
 
   /**
    * Represents an instruction. All instructions
@@ -87,8 +89,6 @@ case object BrilAst {
    * reference.
    */
   sealed trait Instruction {
-    type InstrType <: Instruction
-
     val args: Seq[Ident] = Seq.empty
     val labels: Seq[Ident] = Seq.empty
     val funcs: Seq[Ident] = Seq.empty
@@ -97,19 +97,19 @@ case object BrilAst {
      * Modify the arguments of this instruction
      * according to the given function.
      */
-    def mapArgs(f: Ident => Ident): InstrType = this.asInstanceOf[InstrType]
+    def mapArgs(f: Ident => Ident): Instruction = this
 
     /**
      * Modify the labels of this instruction
      * according to the given function.
      */
-    def mapLabels(f: Ident => Ident): InstrType = this.asInstanceOf[InstrType]
+    def mapLabels(f: Ident => Ident): Instruction = this
 
     /**
      * Modify the functions of this instruction
      * according to the given function.
      */
-    def mapFuncs(f: Ident => Ident): InstrType = this.asInstanceOf[InstrType]
+    def mapFuncs(f: Ident => Ident): Instruction = this
   }
   object Instruction{
     def unapply(instr: Instruction): Some[(Seq[Ident], Seq[Ident], Seq[Ident])] =
@@ -121,7 +121,6 @@ case object BrilAst {
    * have a destination and a type.
    */
   sealed trait ValueOp extends Instruction {
-    type ValType <: ValueOp
     val dest: Option[Ident]
     val typ: Option[Type]
 
@@ -129,13 +128,13 @@ case object BrilAst {
      * Modify the destination of this instruction
      * according to the given function.
      */
-    def mapDest(f: Option[Ident] => Option[Ident]): ValType = this.asInstanceOf[ValType]
+    def mapDest(f: Option[Ident] => Option[Ident]): ValueOp = this
 
     /**
      * Modify the destination of this instruction
      * according to the given function.
      */
-    def mapType(f: Option[Type] => Option[Type]): ValType = this.asInstanceOf[ValType]
+    def mapType(f: Option[Type] => Option[Type]): ValueOp = this
   }
   object ValueOp {
     def unapply(instr: ValueOp): Some[(Seq[Ident], Seq[Ident], Seq[Ident], Option[Ident], Option[Type])] =
@@ -153,27 +152,21 @@ case object BrilAst {
   sealed trait ControlOp extends EffectOp
 
   // instructions in the core language and the floating point extension.
-  case class Label(label: Ident) extends Instruction { override type InstrType = Label }
+  case class Label(label: Ident) extends Instruction
 
   case class Const(value: Value, dest: Option[Ident] = None, typ: Option[Type] = None) extends ValueOp {
-    override type InstrType = Const
-    override type ValType = Const
     override def mapDest(f: Option[Ident] => Option[Ident]): Const = copy(dest = f(dest))
     override def mapType(f: Option[Type] => Option[Type]): Const = copy(typ = f(typ))
   }
 
-  case class UnOp(op: OpType, x: Ident, dest: Option[Ident] = None, typ: Option[Type] = None) extends ValueOp {
-    override type InstrType = UnOp
-    override type ValType = UnOp
+  case class UnOp(op: UnOpType, x: Ident, dest: Option[Ident] = None, typ: Option[Type] = None) extends ValueOp {
     override val args: Seq[Ident] = Seq(x)
     override def mapArgs(f: Ident => Ident): UnOp = copy(x = f(x))
     override def mapDest(f: Option[Ident] => Option[Ident]): UnOp = copy(dest = f(dest))
     override def mapType(f: Option[Type] => Option[Type]): UnOp = copy(typ = f(typ))
   }
 
-  case class BinOp(op: OpType, x: Ident, y: Ident, dest: Option[Ident] = None, typ: Option[Type] = None) extends ValueOp {
-    override type InstrType = BinOp
-    override type ValType = BinOp
+  case class BinOp(op: BinOpType, x: Ident, y: Ident, dest: Option[Ident] = None, typ: Option[Type] = None) extends ValueOp {
     override val args: Seq[Ident] = Seq(x, y)
     override def mapArgs(f: Ident => Ident): BinOp = copy(x = f(x), y = f(y))
     override def mapDest(f: Option[Ident] => Option[Ident]): BinOp = copy(dest = f(dest))
@@ -181,13 +174,11 @@ case object BrilAst {
   }
 
   case class Jmp(label: Ident) extends ControlOp {
-    override type InstrType = Jmp
     override val labels: Seq[Ident] = Seq(label)
     override def mapLabels(f: Ident => Ident): Jmp = copy(label = f(label))
   }
 
   case class Br(source: Ident, trueLabel: Ident, falseLabel: Ident) extends ControlOp {
-    override type InstrType = Br
     override val args: Seq[Ident] = Seq(source)
     override val labels: Seq[Ident] = Seq(trueLabel, falseLabel)
     override def mapArgs(f: Ident => Ident): Br = copy(source = f(source))
@@ -195,8 +186,6 @@ case object BrilAst {
   }
 
   case class Call(function: Ident, override val args: Seq[Ident] = Seq.empty, dest: Option[Ident] = None, typ: Option[Type] = None) extends ValueOp with ControlOp {
-    override type InstrType = Call
-    override type ValType = Call
     override val funcs: Seq[Ident] = Seq(function)
     override def mapArgs(f: Ident => Ident): Call = copy(args = args.map(f))
     override def mapFuncs(f: Ident => Ident): Call = copy(function = f(function))
@@ -204,17 +193,14 @@ case object BrilAst {
     override def mapType(f: Option[Type] => Option[Type]): Call = copy(typ = f(typ))
   }
 
-  case class Ret() extends ControlOp  { override type InstrType = Ret }
+  case object Return extends ControlOp
 
   case class Return(source: Ident) extends ControlOp {
-    override type InstrType = Return
     override val args: Seq[Ident] = Seq(source)
     override def mapArgs(f: Ident => Ident): Return = copy(source = f(source))
   }
 
   case class Id(source: Ident, dest: Option[Ident] = None, typ: Option[Type] = None) extends ValueOp {
-    override type InstrType = Id
-    override type ValType = Id
     override val args: Seq[Ident] = Seq(source)
     override def mapArgs(f: Ident => Ident): Id = copy(source = f(source))
     override def mapDest(f: Option[Ident] => Option[Ident]): Id = copy(dest = f(dest))
@@ -222,23 +208,19 @@ case object BrilAst {
   }
 
   case class Print(source: Ident) extends EffectOp {
-    override type InstrType = Print
     override val args: Seq[Ident] = Seq(source)
     override def mapArgs(f: Ident => Ident): Print = copy(source = f(source))
   }
 
-  case class NoOp() extends EffectOp  { override type InstrType = NoOp }
+  case object NoOp extends EffectOp
 
   // instructions in the memory extension.
   case class Store(location: Ident, source: Ident) extends EffectOp {
-    override type InstrType = Store
     override val args: Seq[Ident] = Seq(location, source)
     override def mapArgs(f: Ident => Ident): Store = copy(source = f(source), location = f(location))
   }
 
   case class Alloc(size: Ident, dest: Option[Ident] = None, typ: Option[Type] = None) extends ValueOp with EffectOp {
-    override type InstrType = Alloc
-    override type ValType = Alloc
     override val args: Seq[Ident] = Seq(size)
     override def mapArgs(f: Ident => Ident): Alloc = copy(size = f(size))
     override def mapDest(f: Option[Ident] => Option[Ident]): Alloc = copy(dest = f(dest))
@@ -246,14 +228,11 @@ case object BrilAst {
   }
 
   case class Free(source: Ident) extends EffectOp {
-    override type InstrType = Free
     override val args: Seq[Ident] = Seq(source)
     override def mapArgs(f: Ident => Ident): Free = copy(source = f(source))
   }
 
   case class Load(source: Ident, dest: Option[Ident] = None, typ: Option[Type] = None) extends ValueOp {
-    override type InstrType = Load
-    override type ValType = Load
     override val args: Seq[Ident] = Seq(source)
     override def mapArgs(f: Ident => Ident): Load = copy(source = f(source))
     override def mapDest(f: Option[Ident] => Option[Ident]): Load = copy(dest = f(dest))
@@ -263,8 +242,6 @@ case object BrilAst {
   // instructions in the SSA extension.
   case class Phi(override val args: Seq[Ident] = Seq.empty, override val labels: Seq[Ident] = Seq.empty, dest: Option[Ident] = None, typ: Option[Type] = None) extends ValueOp {
     assert(args.length == labels.length, "args and labels have different length for a phi instruction.")
-    override type InstrType = Phi
-    override type ValType = Phi
     override def mapArgs(f: Ident => Ident): Phi = copy(args = args.map(f))
     override def mapLabels(f: Ident => Ident): Phi = copy(labels = labels.map(f))
     override def mapDest(f: Option[Ident] => Option[Ident]): Phi = copy(dest = f(dest))
@@ -272,12 +249,11 @@ case object BrilAst {
   }
 
   // instructions in the speculative execution extension.
-  case class Speculate() extends EffectOp { override type InstrType = Speculate }
+  case object Speculate extends EffectOp
 
-  case class Commit() extends EffectOp  { override type InstrType = Commit }
+  case object Commit extends EffectOp
 
   case class Guard(source: Ident, label: Ident) extends EffectOp {
-    override type InstrType = Guard
     override val args: Seq[Ident] = Seq(source)
     override val labels: Seq[Ident] = Seq(label)
     override def mapArgs(f: Ident => Ident): Guard = copy(source = f(source))

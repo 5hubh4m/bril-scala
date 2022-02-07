@@ -14,9 +14,11 @@ case object BrilJson extends DefaultJsonProtocol {
   /**
    * Convert [[OpType]] to JSON.
    */
-  implicit object OpJsonWriter extends JsonWriter[OpType] {
-    def write(op: OpType): JsValue = JsString(op.toString.toLowerCase)
+  class OpJsonWriter[T <: OpType] extends JsonWriter[T] {
+    def write(op: T): JsValue = JsString(op.toString.toLowerCase)
   }
+  private implicit val unOpWriter: OpJsonWriter[UnOpType] = new OpJsonWriter[UnOpType]
+  private implicit val binOpWriter: OpJsonWriter[BinOpType] = new OpJsonWriter[BinOpType]
 
   /**
    * Convert [[Type]] to and from a JSON value.
@@ -87,7 +89,7 @@ case object BrilJson extends DefaultJsonProtocol {
         // parse according to the op
         val instr = m("op") -> args -> labels -> funcs match {
           // basic ops
-          case JsString("nop") -> _ -> _ -> _ => NoOp()
+          case JsString("nop") -> _ -> _ -> _ => NoOp
           case JsString("print") -> (s :: _) -> _ -> _ => Print(s)
           case JsString("id") -> (s :: _) ->  _  -> _ => Id(s)
           case JsString("const") -> _ -> _ -> _ if m.contains("value") => Const(m("value").convertTo[Value])
@@ -95,7 +97,7 @@ case object BrilJson extends DefaultJsonProtocol {
           // control flow ops
           case JsString("jmp") -> _ -> (l :: _) -> _ => Jmp(l)
           case JsString("ret") -> (a :: _) -> _ -> _ => Return(a)
-          case JsString("ret") -> _ -> _ -> _ => Ret()
+          case JsString("ret") -> _ -> _ -> _ => Return
           case JsString("call") -> a -> _ -> (f :: _) => Call(f, a)
           case JsString("br") -> (a :: _) -> (t :: f :: _) -> _ => Br(a, t, f)
 
@@ -142,8 +144,8 @@ case object BrilJson extends DefaultJsonProtocol {
 
           // speculative execution instructions
           case JsString("guard") -> (a :: _) -> (l :: _) -> _ => Guard(a, l)
-          case JsString("speculate") -> _ -> _ -> _ => Speculate()
-          case JsString("commit") -> _ -> _ -> _ => Commit()
+          case JsString("speculate") -> _ -> _ -> _ => Speculate
+          case JsString("commit") -> _ -> _ -> _ => Commit
 
           case v -> _ -> _ -> _ => throw DeserializationException(f"Failed to parse instruction in $v.")
         }
@@ -174,11 +176,11 @@ case object BrilJson extends DefaultJsonProtocol {
         case _: Jmp => Seq("op" -> JsString("jmp"))
         case _: Br => Seq("op" -> JsString("br"))
         case _: Call => Seq("op" -> JsString("call"))
-        case _: Ret => Seq("op" -> JsString("ret"))
+        case Return => Seq("op" -> JsString("ret"))
         case _: Return => Seq("op" -> JsString("ret"))
         case _: Id => Seq("op" -> JsString("id"))
         case _: Print => Seq("op" -> JsString("print"))
-        case _: NoOp => Seq("op" -> JsString("nop"))
+        case NoOp => Seq("op" -> JsString("nop"))
 
         // memory extension ops
         case _: Store => Seq("op" -> JsString("store"))
@@ -190,8 +192,8 @@ case object BrilJson extends DefaultJsonProtocol {
         case _: Phi => Seq("op" -> JsString("phi"))
 
         // speculative execution ops
-        case _: Speculate => Seq("op" -> JsString("speculate"))
-        case _: Commit => Seq("op" -> JsString("commit"))
+        case Speculate => Seq("op" -> JsString("speculate"))
+        case Commit => Seq("op" -> JsString("commit"))
         case _: Guard => Seq("op" -> JsString("guard"))
       })
 
