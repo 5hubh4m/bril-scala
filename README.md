@@ -8,7 +8,7 @@ that is easier to manipulate in a strongly typed language like Scala.
 
 This project depends upon the following dependencies to use fully:
 * `java` and `sbt` for building and running
-* `turnt`, `diff`, and `jq` for running test scripts
+* `turnt` and `jq` for running test scripts
 
 You can compile the library and publish it to your local [Ivy](https://ant.apache.org/ivy/) repository using `sbt`.
 If you have `sbt` installed, from inside the project root, execute:
@@ -42,8 +42,7 @@ The library has three main classes:
 
 The library has one test called `JsonToJsonTest` which reads a JSON Bril program and parses it to a `Program` and 
 produces a pretty printed JSON string. We can test the end-to-end functionality using [Turnt](https://github.com/cucapra/turnt)
-by comparing the input and output JSONs using some `diff` and `jq` magic. The output of the test should be an empty file
-indicating the output JSON is identical to the input.
+by comparing the input (unmodified) and (processed) output JSONs using some `jq` magic.
 
 The `test` contains the all same tests used for `brili`. To use these tests, we first need to compile the package into
 a fat JAR that can be run with just `java`. We use [sbt-assembly](https://github.com/sbt/sbt-assembly) for that.
