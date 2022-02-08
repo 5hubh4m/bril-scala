@@ -27,15 +27,9 @@ case object BrilAst {
   /**
    * Values possible in a program.
    */
-  sealed trait Value { val asBool: Boolean; val asNum: BigDecimal }
-  case class BoolValue(value: Boolean) extends Value {
-    val asBool: Boolean = value
-    override val asNum: BigDecimal = if (value) 1 else 0
-  }
-  case class NumericValue(value: BigDecimal) extends Value {
-    val asBool: Boolean = value != 0
-    val asNum: BigDecimal = value
-  }
+  sealed trait Value
+  case class BoolValue(value: Boolean) extends Value
+  case class NumericValue(value: BigDecimal) extends Value
 
   /**
    * A function has a name, a list of arguments,
