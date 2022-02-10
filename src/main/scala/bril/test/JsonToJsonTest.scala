@@ -7,7 +7,7 @@ import bril.lang.BrilParse._
  * parses it into an AST, and then produces
  * a JSON back.
  */
-case object JsonToJsonTest extends App {
+object JsonToJsonTest extends App {
 
   // read the program from stdin and print the JSON back to stdout
   print(printProgramToJson(readProgramFromStdin.get))

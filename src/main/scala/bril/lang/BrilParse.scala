@@ -11,7 +11,7 @@ import scala.util._
  * Utilities for parsing and printing Bril
  * programs in JSON.
  */
-case object BrilParse {
+object BrilParse {
 
   /**
    * Parse a Bril program from stdin.

@@ -3,7 +3,7 @@ package bril.lang
 /**
  * Define the classes that form the AST of Bril.
  */
-case object BrilAst {
+object BrilAst {
 
   /**
    * Type of identifiers.
