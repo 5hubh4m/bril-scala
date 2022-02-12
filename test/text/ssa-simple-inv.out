@@ -1,0 +1,10 @@
+@main(cond: bool) {
+.top:
+  a: int = const 5;
+  br cond .here .there;
+.here:
+  b: int = const 7;
+.there:
+  c: int = phi a b .top .here;
+  print c;
+}

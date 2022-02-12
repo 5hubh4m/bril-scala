@@ -1,0 +1,2 @@
+command = "bril2json < {filename} | ../../scripts/run bril.test.JsonToJsonTest | jq -c --sort-keys ."
+output.out = "-"

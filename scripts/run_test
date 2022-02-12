@@ -1,4 +1,0 @@
-#!/bin/bash
-# Get the dir of this project
-DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)/..
-java -cp "$DIR/target/scala-2.13/bril-scala-assembly-0.1.0.jar" bril.test.JsonToJsonTest

@@ -40,9 +40,10 @@ The library has three main classes:
 
 ### Testing
 
-The library has one test called `JsonToJsonTest` which reads a JSON Bril program and parses it to a `Program` and 
-produces a pretty printed JSON string. We can test the end-to-end functionality using [Turnt](https://github.com/cucapra/turnt)
-by comparing the input (unmodified) and (processed) output JSONs using some `jq` magic.
+The library has two tests called `JsonToJsonTest` which reads a JSON Bril program and parses it to a `Program` and 
+produces a pretty printed JSON string, and another call `JsonToTextTest` which takes in a JSON Bril program, parses it
+to a `Program` and pretty prints it as a text Bril program. We can test the end-to-end functionality using 
+[Turnt](https://github.com/cucapra/turnt) by comparing the input (unmodified) and (processed) output JSONs using some `jq` magic.
 
 The `test` contains the all same tests used for `brili`. To use these tests, we first need to compile the package into
 a fat JAR that can be run with just `java`. We use [sbt-assembly](https://github.com/sbt/sbt-assembly) for that.
@@ -52,10 +53,10 @@ From inside the project root, execute:
 sbt assembly
 ```
 
-This will build a fat JAR for the project which the script `scripts/run_test` can call for you with the right `mainClass`,
-and is what `turnt` uses. Run the tests in the `tests` directory using:
+This will build a fat JAR for the project which the script `scripts/run` can call for you with the right `mainClass`,
+and is what `turnt` uses. Run the tests in the `test` directory using:
 
 ```
-cd tests/
-turnt *.bril
+cd test/
+turnt */*.bril
 ```

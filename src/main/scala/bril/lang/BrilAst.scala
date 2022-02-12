@@ -13,39 +13,48 @@ object BrilAst {
   /**
    * Program is a list of functions.
    */
-  case class Program(functions: Seq[Function])
+  case class Program(functions: Seq[Function]) {
+    lazy val prettyPrint: String = functions.map(_.prettyPrint).mkString
+  }
 
   /**
    * There are three types: int, bool, float, and ptr of types.
    */
-  sealed trait Type
-  case object IntType extends Type
-  case object BoolType extends Type
-  case object FloatType extends Type
-  case class PtrType(typ: Type) extends Type
+  sealed trait Type { val prettyPrint: String }
+  case object IntType extends Type { lazy val prettyPrint: String = "int" }
+  case object BoolType extends Type { lazy val prettyPrint: String = "bool" }
+  case object FloatType extends Type { lazy val prettyPrint: String = "float" }
+  case class PtrType(typ: Type) extends Type { lazy val prettyPrint: String = f"ptr<${typ.prettyPrint}>" }
 
   /**
    * Values possible in a program.
    */
-  sealed trait Value
-  case class BoolValue(value: Boolean) extends Value
-  case class NumericValue(value: BigDecimal) extends Value
+  sealed trait Value { val prettyPrint: String }
+  case class BoolValue(value: Boolean) extends Value { lazy val prettyPrint: String = value.toString }
+  case class NumericValue(value: BigDecimal) extends Value { lazy val prettyPrint: String = value.toString }
 
   /**
    * A function has a name, a list of arguments,
    * a type (if it returns something), and a
    * list of instructions.
    */
-  case class Argument(name: Ident, typ: Type)
+  case class Argument(name: Ident, typ: Type) { lazy val prettyPrint: String = f"$name: ${typ.prettyPrint}" }
   case class Function(name: Ident,
                       args: Seq[Argument],
                       typ: Option[Type],
-                      instrs: Seq[Instruction])
+                      instrs: Seq[Instruction]) {
+    lazy val prettyPrint: Ident = {
+      val as = if (args.isEmpty) "" else f"(${args.map(_.prettyPrint).mkString(", ")})"
+      val ts = if (typ.isEmpty) "" else f": ${typ.get.prettyPrint}"
+      val is = if (instrs.isEmpty) "" else instrs.map(_.prettyPrint + "\n").mkString
+      f"@$name$as$ts {\n$is}\n"
+    }
+  }
 
   /**
    * Different types of primitive ops.
    */
-  sealed trait OpType
+  sealed trait OpType { lazy val prettyPrint: String = toString.toLowerCase }
   sealed trait BinOpType extends OpType
   sealed trait UnOpType extends OpType
   sealed trait IntOpType extends OpType
@@ -104,10 +113,35 @@ object BrilAst {
      * according to the given function.
      */
     def mapFuncs(f: Ident => Ident): Instruction = this
-  }
-  object Instruction{
-    def unapply(instr: Instruction): Some[(Seq[Ident], Seq[Ident], Seq[Ident])] =
-      Some(instr.args, instr.labels, instr.funcs)
+
+    /**
+     * Pretty print an instruction.
+     */
+    lazy val prettyPrint: Ident = {
+      // get the labels, functions, and args
+      lazy val as = if (args.isEmpty) "" else " " + args.mkString(" ")
+      lazy val ls = if (labels.isEmpty) "" else " " + labels.map("." + _).mkString(" ")
+      lazy val fs = if (funcs.isEmpty) "" else " " + funcs.map("@" + _).mkString(" ")
+
+      // get the op
+      lazy val op = this match {
+        case UnOp (op, _, _, _) => op.prettyPrint
+        case BinOp (op, _, _, _, _) => op.prettyPrint
+        case _ => this.getClass.getSimpleName.filter(_!= '$').toLowerCase
+      }
+
+      // get the assignment
+      lazy val assign = Some(this)
+        .collect({ case ValueOp(_, _, _, Some(dest), Some(typ)) => f"$dest: ${typ.prettyPrint} = " })
+        .getOrElse("")
+
+      // return the string
+      this match {
+        case Label(l) => f".$l:"
+        case Const(v, _, _) => f"  ${assign}const ${v.prettyPrint};"
+        case _ => f"  $assign$op$fs$as$ls;"
+      }
+    }
   }
 
   /**
@@ -139,6 +173,10 @@ object BrilAst {
    * Effect operations are ones with some side-effect.
    */
   sealed trait EffectOp extends Instruction
+  object EffectOp {
+    def unapply(instr: EffectOp): Some[(Seq[Ident], Seq[Ident], Seq[Ident])] =
+      Some(instr.args, instr.labels, instr.funcs)
+  }
 
   /**
    * Control operations change the control flow of execution.
@@ -187,11 +225,11 @@ object BrilAst {
     override def mapType(f: Option[Type] => Option[Type]): Call = copy(typ = f(typ))
   }
 
-  case object Return extends ControlOp
+  case object Ret extends ControlOp
 
-  case class Return(source: Ident) extends ControlOp {
+  case class Ret(source: Ident) extends ControlOp {
     override val args: Seq[Ident] = Seq(source)
-    override def mapArgs(f: Ident => Ident): Return = copy(source = f(source))
+    override def mapArgs(f: Ident => Ident): Ret = copy(source = f(source))
   }
 
   case class Id(source: Ident, dest: Option[Ident] = None, typ: Option[Type] = None) extends ValueOp {
@@ -206,7 +244,7 @@ object BrilAst {
     override def mapArgs(f: Ident => Ident): Print = copy(source = f(source))
   }
 
-  case object NoOp extends EffectOp
+  case object Nop extends EffectOp
 
   // instructions in the memory extension.
   case class Store(location: Ident, source: Ident) extends EffectOp {

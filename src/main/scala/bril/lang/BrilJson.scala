@@ -89,15 +89,15 @@ case object BrilJson extends DefaultJsonProtocol {
         // parse according to the op
         val instr = m("op") -> args -> labels -> funcs match {
           // basic ops
-          case JsString("nop") -> _ -> _ -> _ => NoOp
+          case JsString("nop") -> _ -> _ -> _ => Nop
           case JsString("print") -> (s :: _) -> _ -> _ => Print(s)
           case JsString("id") -> (s :: _) ->  _  -> _ => Id(s)
           case JsString("const") -> _ -> _ -> _ if m.contains("value") => Const(m("value").convertTo[Value])
 
           // control flow ops
           case JsString("jmp") -> _ -> (l :: _) -> _ => Jmp(l)
-          case JsString("ret") -> (a :: _) -> _ -> _ => Return(a)
-          case JsString("ret") -> _ -> _ -> _ => Return
+          case JsString("ret") -> (a :: _) -> _ -> _ => Ret(a)
+          case JsString("ret") -> _ -> _ -> _ => Ret
           case JsString("call") -> a -> _ -> (f :: _) => Call(f, a)
           case JsString("br") -> (a :: _) -> (t :: f :: _) -> _ => Br(a, t, f)
 
@@ -176,11 +176,11 @@ case object BrilJson extends DefaultJsonProtocol {
         case _: Jmp => Seq("op" -> JsString("jmp"))
         case _: Br => Seq("op" -> JsString("br"))
         case _: Call => Seq("op" -> JsString("call"))
-        case Return => Seq("op" -> JsString("ret"))
-        case _: Return => Seq("op" -> JsString("ret"))
+        case Ret => Seq("op" -> JsString("ret"))
+        case _: Ret => Seq("op" -> JsString("ret"))
         case _: Id => Seq("op" -> JsString("id"))
         case _: Print => Seq("op" -> JsString("print"))
-        case NoOp => Seq("op" -> JsString("nop"))
+        case Nop => Seq("op" -> JsString("nop"))
 
         // memory extension ops
         case _: Store => Seq("op" -> JsString("store"))
